@@ -1,0 +1,37 @@
+stages:
+  - package
+  - deploy
+
+docker-package-prod:
+  stage: package
+  only:
+    - main
+  before_script:
+    - docker login -u $USER_DOCKER -p $PASSWORD_DOCKER;
+  script:
+    - docker build -t $DOCKER_REGISTRY/$IMAGE_NAME:$CI_COMMIT_BRANCH --file Dockerfile.prod .;
+    - docker push $DOCKER_REGISTRY/$IMAGE_NAME:$CI_COMMIT_BRANCH;
+    - docker system prune -f;
+
+deploy-prod:
+  stage: deploy
+  only:
+    - main
+  variables:
+    GIT_STRATEGY: none
+  before_script:
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan $SSH_SERVER_IP >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  script:
+    - ssh $SSH_USER@$SSH_SERVER_IP
+      "docker login -u $USER_DOCKER -p $PASSWORD_DOCKER;
+      docker container stop $SERVICE_NAME_PROD;
+      docker container rm $SERVICE_NAME_PROD;
+      docker system prune -f;
+      docker pull $DOCKER_REGISTRY/$IMAGE_NAME:$CI_COMMIT_BRANCH;
+      docker run --restart=always -d --name $SERVICE_NAME_PROD -p 10000:8080 $DOCKER_REGISTRY/$IMAGE_NAME:$CI_COMMIT_BRANCH;"
+

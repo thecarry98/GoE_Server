@@ -1,0 +1,43 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/learn_english
+    password: 2001
+    username: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQL10Dialect
+  servlet:
+    multipart:
+      max-file-size: 1024MB
+      max-request-size: 1024MB
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+#Application properties
+application:
+  jwtSecret: makeSuperSecretStringThatSoDifficultToGuessAndSoLongThatNoOneCanRemember1000WordsXRQmTFFJ95m359028m5235b259n02qbnq56
+  jwtRefreshTokenSecret: makeSuperSecretStringThatSoDifficultToGuessAndSoLongThatNoOneCanRemember1000WordsXRQmTFFJ95m359028m5235b259n02qbnq56
+  jwtExpiration: 36000000  #miliseconds
+  jwtExpirationRefreshToken: 432000000 #miliseconds
+
+  allowed-origins: >
+    http://localhost:3000,
+    http://localhost:4000
+server:
+  port: 8080
+# Minio
+minio:
+  bucket:
+    name: learnE-dev
+  access:
+    key: minioadmin
+    secret: minioadmin
+  url: http://localhost:9000
+tinify:
+  api:
+    key: l9QCnWDL39BHZky0tBgF9p9sKRTtSv80
